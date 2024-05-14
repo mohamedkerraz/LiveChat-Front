@@ -17,6 +17,7 @@
 
   } from "firebase/auth";
   import {useRouter} from 'vue-router';
+  import store from '../store/store';
 
   const email = ref ("");
   const mdp = ref ("");
@@ -25,13 +26,14 @@
 
   const login = () =>{
     signInWithEmailAndPassword(getAuth(), email.value, mdp.value)
-        .then((data)=>{
+        .then((result)=>{
             console.log("Connexion réussite !");
-
+            const username = getUsernameFromEmail(result.user.email);
+            const userInfo = { ...result.user, displayName: username };
+            store.dispatch('setUser', userInfo);
             router.push('/livechat');
         })
         .catch((error)=> {
-          console.log(error.code);
           switch(error.code){
             case "auth/invalid-email":
               msgErr.value = "Email invalide";
@@ -49,19 +51,40 @@
         })
   };
 
+const getUsernameFromEmail = (email) => {
+  const atIndex = email.indexOf('@');
+  if (atIndex !== -1) {
+    return email.substring(0, atIndex);
+  } else {
+    return 'undefined'; 
+  }
+};
 
-  const signInWithGoogle = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(getAuth(), provider)
-      .then((result) => {
-        console.log(result.user);
-        router.push('/livechat');
+const signInWithGoogle = () => {
+  const provider = new GoogleAuthProvider();
 
-      })
-      .catch((error) =>{
-
-      });
-  };
+  signInWithPopup(getAuth(), provider)
+    .then((result) => {
+      store.dispatch('setUser', result.user);
+      router.push('/livechat');
+    })
+    .catch((error) =>{
+      switch(error.code){
+          case "auth/invalid-email":
+            msgErr.value = "Email invalide";
+            break;
+          case "auth/user-not-found":
+            msgErr.value = "Utilisateur introuvable";
+            break;
+          case "auth/wrong-password":
+            msgErr.value = "Mot de passe incorrect";
+            break;
+          default:
+            msgErr.value = "Email ou mot de passe incorrect";
+            break;
+        }
+    });
+};
 
 
 </script>

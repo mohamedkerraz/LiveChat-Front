@@ -5,16 +5,9 @@ import { getAuth } from "firebase/auth";
 const router = createRouter({
     history: createWebHistory(),
     routes:[
-        {path: "/inscription", component: () => import("../components/Register.vue")},
-
-        {path: "/login", component: () => import("../components/LoginComponent.vue")},
-        {
-            path: "/livechat", 
-            component: () => import("../components/LiveChat.vue"),
-            meta: {
-                requiresAuth: true,
-            },
-        },
+        { path: "/inscription", component: () => import("../components/Register.vue"), meta: { requiresAuth: false } },
+        { path: "/login", component: () => import("../components/LoginComponent.vue"), meta: { requiresAuth: false } },
+        { path: "/livechat", component: () => import("../components/LiveChat.vue"), meta: { requiresAuth: true } }
     ]
 });
 
@@ -32,14 +25,16 @@ const getCurrentUser = () => {
 };
 
 router.beforeEach(async (to, from, next) => {
-    if(to.matched.some((record) => record.meta.requiresAuth)){
-        if(await getCurrentUser()){
-            next();
-        }else{
-            alert("you dont have access !");
-            next("/login");
-        }
-    }else{
+    const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+    const currentUser = await getCurrentUser();
+
+    if (requiresAuth && !currentUser) {
+        alert("Vous n'avez pas accès !");
+        next("/login");
+    } else if (!requiresAuth && currentUser) {
+        console.log("here");
+        next("/livechat"); 
+    } else {
         next();
     }
 });
