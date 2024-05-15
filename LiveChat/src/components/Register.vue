@@ -9,8 +9,8 @@
 
 <script setup>
   import { ref } from "vue";
-  import { 
-    getAuth, 
+  import {
+    getAuth,
     createUserWithEmailAndPassword,
     GoogleAuthProvider,
     signInWithPopup
@@ -27,7 +27,6 @@
     createUserWithEmailAndPassword(getAuth(), email.value, mdp.value)
         .then((data)=>{
             console.log("Inscription réussite !");
-           
             router.push('/livechat');
         })
         .catch((error)=> {
@@ -63,5 +62,3 @@
   };
 
 </script>
-  
- 

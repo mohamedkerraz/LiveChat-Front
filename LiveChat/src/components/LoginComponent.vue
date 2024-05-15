@@ -5,12 +5,12 @@
   <p v-if="msgErr"> {{ msgErr }}</p>
   <p><button @click="login">Se connecter</button></p>
   <p><button @click="signInWithGoogle">Se connecter avec Google</button></p>
-</template> 
+</template>
 
 <script setup>
   import { ref } from "vue";
-  import { 
-    getAuth, 
+  import {
+    getAuth,
     signInWithEmailAndPassword,
     GoogleAuthProvider,
     signInWithPopup
@@ -29,6 +29,7 @@
         .then((result)=>{
             console.log("Connexion réussite !");
             const username = getUsernameFromEmail(result.user.email);
+            console.log(result.user);
             const userInfo = { ...result.user, displayName: username };
             store.dispatch('setUser', userInfo);
             router.push('/livechat');
@@ -88,5 +89,3 @@ const signInWithGoogle = () => {
 
 
 </script>
-  
- 

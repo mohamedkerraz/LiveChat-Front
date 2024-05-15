@@ -1,0 +1,78 @@
+<template>
+  <div class="live-chat">
+    <h1>Live Chat</h1>
+    <ul>
+      <li v-for="(message, index) in messages" :key="index">
+        {{ message.text }}
+      </li>
+    </ul>
+    <input v-model="newMessage" @keyup.enter="sendMessage" placeholder="Type a message..." />
+    <button @click="sendMessage">Send</button>
+  </div>
+</template>
+
+<script>
+import { getAuth } from "firebase/auth"
+import { ref } from 'vue';
+
+
+const user = getAuth().currentUser;
+
+
+export default {
+  data() {
+    return {
+      ws: null,
+      newMessage: '',
+      messages : [],
+      userId: user.displayName
+    };
+  },
+  methods: {
+    connect() {
+      console.log(user.accessToken);
+      this.ws = new WebSocket(`ws://localhost:5424?token=${user.accessToken}`);
+
+      this.ws.onopen = function(event) {
+        console.log("Connected", event);
+      };
+
+      this.ws.onmessage = (event) => {
+        console.log("Message received:", event.data);
+        const message = JSON.parse(event.data);
+        console.log(message.text);
+        this.messages.push(message);
+
+      };
+
+      this.ws.onerror = (error) => {
+        console.error('WebSocket Error:', error);
+      };
+
+      this.ws.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+    },
+    sendMessage() {
+      if (this.newMessage.trim() !== '') {
+        console.log(this.userId);
+        const message = { text: this.newMessage, userId: this.userId };
+        this.ws.send(JSON.stringify(message));
+        this.newMessage = '';
+      }
+    }
+  },
+  mounted() {
+    this.connect();
+  },
+  beforeDestroy() {
+    if (this.ws) {
+      this.ws.close();
+    }
+  }
+};
+</script>
+
+<style>
+
+</style>

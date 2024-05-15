@@ -33,7 +33,7 @@ router.beforeEach(async (to, from, next) => {
         next("/login");
     } else if (!requiresAuth && currentUser) {
         console.log("here");
-        next("/livechat"); 
+        next("/livechat");
     } else {
         next();
     }
