@@ -1,11 +1,12 @@
 <template>
   <div class="view-login-container">
     <div class="login-container">
-      <h1>Créer un compte</h1>
+      <h1>Login</h1>
       <input type="text" placeholder="Email" v-model="email" />
       <input type="password" placeholder="Mot de passe" v-model="mdp" />
-      <button @click="register">S'inscrire</button>
-      <button @click="signInWithGoogle()">Se connecter avec Google</button>
+      <p v-if="msgErr">{{ msgErr }}</p>
+      <button @click="login">Se connecter</button>
+      <button @click="signInWithGoogle">Se connecter avec Google</button>
     </div>
   </div>
 </template>
@@ -14,26 +15,25 @@
 import { ref } from "vue";
 import {
   getAuth,
-  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
 import { useRouter } from "vue-router";
+import store from "../store/store";
 
 const email = ref("");
 const mdp = ref("");
 const msgErr = ref();
 const router = useRouter();
 
-const register = () => {
-  createUserWithEmailAndPassword(getAuth(), email.value, mdp.value)
+const login = () => {
+  signInWithEmailAndPassword(getAuth(), email.value, mdp.value)
     .then((result) => {
-      console.log("Inscription réussite !");
-
+      console.log("Connexion réussite !");
       router.push("/livechat");
     })
     .catch((error) => {
-      console.log(error.code);
       switch (error.code) {
         case "auth/invalid-email":
           msgErr.value = "Email invalide";
@@ -51,10 +51,9 @@ const register = () => {
     });
 };
 
-
-
 const signInWithGoogle = () => {
   const provider = new GoogleAuthProvider();
+
   signInWithPopup(getAuth(), provider)
     .then((result) => {
       console.log("Connexion réussite !");

@@ -5,8 +5,9 @@ import { getAuth } from "firebase/auth";
 const router = createRouter({
     history: createWebHistory(),
     routes:[
+        { path: "/", component: () => import("../components/Home.vue"), meta: { requiresAuth: false } },
         { path: "/inscription", component: () => import("../components/Register.vue"), meta: { requiresAuth: false } },
-        { path: "/login", component: () => import("../components/LoginComponent.vue"), meta: { requiresAuth: false } },
+        { path: "/login", component: () => import("../components/Login.vue"), meta: { requiresAuth: false } },
         { path: "/livechat", component: () => import("../components/LiveChat.vue"), meta: { requiresAuth: true } }
     ]
 });
@@ -29,10 +30,9 @@ router.beforeEach(async (to, from, next) => {
     const currentUser = await getCurrentUser();
 
     if (requiresAuth && !currentUser) {
-        alert("Vous n'avez pas accès !");
+        
         next("/login");
     } else if (!requiresAuth && currentUser) {
-        console.log("here");
         next("/livechat");
     } else {
         next();
